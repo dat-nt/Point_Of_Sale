@@ -1,0 +1,273 @@
+<style>
+    .table td:last-child {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .table td:last-child button {
+        flex-grow: 1;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+
+    .table img {
+        max-width: 50px;
+        max-height: 50px;
+        object-fit: cover;
+    }
+
+    @media (max-width: 768px) {
+        .table td:last-child {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+
+
+<div class="container p-3">
+    <h1 class="mb-4 text-center">Danh sách nhân viên</h1>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createEmployeeModal">
+        <i class="fa-solid fa-user-plus me-1"></i>Tạo tài khoản nhân viên
+    </button>
+    <div class="mb-3">Chọn email để xem chi tiết nhân viên</div>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark text-center align-middle">
+            <tr>
+                <th>#</th>
+                <th>Email</th>
+                <th>Họ Tên</th>
+                <th>Avatar</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each employees}}
+            <tr class="align-middle">
+                <td>{{increment @index}}</td>
+                <td><a href="/employees/{{this._id}}/details">{{this.email}}</a></td>
+                <td>{{this.fullname}}</td>
+                <td><img src="/img/users/{{this.avatar}}" alt="Avatar" class="img-thumbnail" width="50"></td>
+                <td>{{formatDate this.createdAt}}</td>
+                <td>{{this.status}}</td>
+                <td>
+                    <!-- Nút khóa/mở khóa -->
+                    <button class="btn {{#ifCond this.status "==" "Locked"}}btn-success{{else}}btn-danger{{/ifCond}}
+                        toggle-lock" data-id="{{this._id}}" data-status="{{this.status}}" {{#ifCond
+                        this.status "==" "Inactive" }}disabled{{/ifCond}}>
+                        <i class="fa-solid {{#ifCond this.status "==" "Locked"}}fa-unlock{{else}}fa-lock{{/ifCond}}
+                            me-1"></i>
+                        {{#ifCond this.status "==" "Locked"}}Mở khóa{{else}}Khóa{{/ifCond}}
+                    </button>
+
+                    <!-- Nút gửi lại email -->
+                    <button class="btn btn-info resend-email" data-id="{{this._id}}" {{#ifCond this.status "==" "Active"
+                        }}disabled{{/ifCond}} {{#ifCond this.status "==" "Locked" }}disabled{{/ifCond}}>
+                        <i class="fa-solid fa-envelope me-1"></i>
+                        Gửi lại email
+                    </button>
+
+                    <!-- Nút xem thông tin bán hàng -->
+                    <button class="btn btn-warning view-sales-info" data-bs-toggle="modal" data-bs-target="#salesDetailsModal"  data-id="{{this._id}}" data-email="{{this.email}}"
+                        data-name="{{this.fullname}}">
+                        <i class="fa-solid fa-eye me-1"></i>
+                        Thông tin bán hàng
+                    </button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal xem thông tin bán hàng -->
+<div class="modal fade" id="salesDetailsModal" tabindex="-1" aria-labelledby="salesDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="salesDetailsModalLabel">Thông tin bán hàng</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Thông tin nhân viên -->
+                <div class="mb-3">
+                    <h5 class="text-primary">Thông tin nhân viên</h5>
+                    <p><strong>ID:</strong> <span id="modalEmployeeId"></span></p>
+                    <p><strong>Email:</strong> <span id="modalEmployeeEmail"></span></p>
+                    <p><strong>Họ tên:</strong> <span id="modalEmployeeName"></span></p>
+                </div>
+                <hr>
+                <!-- Thông số bán hàng -->
+                <div class="mb-3">
+                    <h5 class="text-success">Thông số bán hàng</h5>
+                    <p><strong>Tổng số đơn hàng:</strong> <span id="modalTotalOrders"></span></p>
+                    <p><strong>Tổng doanh thu:</strong> <span id="modalTotalRevenue"></span></p>
+                    <p><strong>Tổng sản phẩm đã bán:</strong> <span id="modalTotalProducts"></span></p>
+                </div>
+                <hr>
+                <!-- Bảng danh sách đơn hàng -->
+                <h5 class="text-danger-emphasis">Danh sách đơn hàng của nhân viên</h5>
+                <table class="table table-bordered">
+                    <thead class="table-dark text-center align-middle">
+                        <tr>
+                            <th>#</th>
+                            <th>Mã đơn hàng</th>
+                            <th>Ngày tạo</th>
+                            <th>Tổng sản phẩm</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeOrderDetails">
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createEmployeeModal" tabindex="-1" aria-labelledby="createEmployeeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="createEmployeeModalLabel">Tạo tài khoản nhân viên</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="/employees/create-new">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="fullname" class="form-label">Họ và Tên</label>
+                        <input type="text" name="fullname" class="form-control" id="fullname" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" id="email" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Tạo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).on("click", ".toggle-lock", function () {
+        const button = $(this);
+        const userId = button.data("id");
+        const currentStatus = button.data("status");
+
+        // Vô hiệu hóa nút trong khi đang xử lý
+        button.prop("disabled", true).text("Đang xử lý...");
+
+        // Gửi yêu cầu AJAX
+        $.ajax({
+            url: `/employees/${userId}/toggle-lock`,
+            type: "POST",
+            success: function (response) {
+                alert(response.message || "Trạng thái tài khoản đã được thay đổi.");
+                location.reload()
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON?.message || "Có lỗi xảy ra khi thay đổi trạng thái.");
+            },
+        });
+    });
+
+    $(document).on("click", ".resend-email", function () {
+        const button = $(this);
+        const userId = button.data("id");
+
+        button.prop("disabled", true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang gửi...');
+
+        $.ajax({
+            url: `/employees/${userId}/resend`,
+            type: "POST",
+            success: function (response) {
+                alert(response.message || "Đã gửi lại email kích hoạt thành công.");
+                button.html('<i class="fa-solid fa-check me-1"></i>Đã gửi email')
+                    .removeClass("btn-info")
+                    .addClass("btn-success");
+            },
+            error: function (xhr) {
+                alert(xhr.responseJSON.message || "Có lỗi xảy ra khi gửi email.");
+                button.prop("disabled", false).html('<i class="fa-solid fa-envelope me-1"></i>Gửi lại email');
+            },
+        });
+
+        // Vô hiệu hóa nút trong 1 phút
+        setTimeout(() => {
+            button.prop("disabled", false).text("Gửi lại email").removeClass("btn-success").addClass("btn-info");
+        }, 60000);
+    });
+
+    $(document).on("click", ".view-sales-info", function () {
+        const userId = $(this).data("id");
+        const userEmail = $(this).data("email");
+        const userName = $(this).data("name"); // Lấy tên từ thuộc tính data-name
+
+        // Clear dữ liệu cũ trước khi gán dữ liệu mới
+        $("#modalEmployeeId").text("");
+        $("#modalEmployeeEmail").text("");
+        $("#modalEmployeeName").text("");
+        $("#modalTotalOrders").text("...");
+        $("#modalTotalRevenue").text("...");
+        $("#modalTotalProducts").text("...");
+        $("#employeeOrderDetails").html("");
+
+        $("#modalEmployeeId").text(userId);
+        $("#modalEmployeeEmail").text(userEmail);
+        $("#modalEmployeeName").text(userName);
+
+        // Gửi yêu cầu AJAX đến server để lấy thông tin bán hàng
+        $.ajax({
+            url: `/employees/${userId}/sales-info`,
+            type: "GET",
+            success: function (response) {
+                if (response.success) {
+                    $("#modalTotalOrders").text(response.totalOrders);
+                    $("#modalTotalRevenue").text(formatVND(response.totalRevenue));
+                    $("#modalTotalProducts").text(response.totalProductsSold);
+
+                    let orderRows = "";
+                    response.orderDetails.forEach(order => {
+                        orderRows += `
+                        <tr class="text-center align-middle">
+                            <td>${order.index}</td>
+                            <td>${order.orderId}</td>
+                            <td>${formatDate(order.createdAt)}</td>
+                            <td>${order.totalProducts}</td>
+                            <td>${formatVND(order.totalPrice)}</td>
+                        </tr>
+                    `;
+                    });
+
+                    $("#employeeOrderDetails").html(orderRows);
+                } else {
+                    $("#salesDetailsModal").modal("hide");
+                    showAlert("warning", response?.message || "Có lỗi xảy ra.")
+                }
+            },
+            error: function (xhr) {
+                $("#salesDetailsModal").modal("hide");
+                showAlert("danger", xhr.responseJSON?.message || "Có lỗi xảy ra khi tải dữ liệu đơn hàng.")
+            }
+        });
+    });
+
+</script>

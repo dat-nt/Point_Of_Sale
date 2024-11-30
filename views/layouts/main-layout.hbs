@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .wrapper {
+            display: flex;
+            height: 100%;
+        }
+
+        .sidebar {
+            position: relative;
+            width: 250px;
+            min-width: 250px;
+            background-color: #222d32;
+            color: #fff;
+            padding-top: 20px;
+        }
+
+        .sidebar .nav-link {
+            color: #fff;
+        }
+
+        .sidebar .nav-link.active {
+            background: #0d1214;
+            border-left: 5px solid #00695C;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #000000;
+            color: rgb(79, 79, 248);
+        }
+
+        .sidebar .logout-btn {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #152524;
+            color: #fff;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .sidebar .logout-btn:hover {
+            color: #f44336;
+            text-decoration: none;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .navbar {
+            background-color: #00695c;
+            color: #fff;
+        }
+
+        .app-search {
+            position: relative;
+            display: flex;
+            align-self: center;
+            margin-right: 15px;
+            padding: 10px 0;
+        }
+
+        .navbar .nav-link,
+        .navbar-brand {
+            color: #fff;
+        }
+
+        .navbar .nav-link:hover {
+            opacity: 0.8;
+        }
+
+        #toggleSidebar {
+            color: white;
+        }
+
+        .content {
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100vh - 56px);
+            /* 56px is the height of the navbar */
+            background-color: #f8f9fa;
+        }
+
+        /* Toggle sidebar */
+        .sidebar.collapsed {
+            display: none;
+        }
+
+        .main-content.collapsed {
+            margin-left: 0;
+        }
+
+        /*Modal */
+        .modal-content {
+            background-color: #f3f3f3;
+            color: #000000;
+        }
+
+        .modal-header {
+            background-color: #10394c;
+            color: #ffffff;
+        }
+
+        .modal-title {
+            color: #ffffff;
+        }
+
+        .modal-footer {
+            background-color: #10394c;
+        }
+
+        .modal-footer .btn-primary {
+            background-color: #4caf50;
+            border-color: #4caf50;
+        }
+
+        .modal-footer .btn-secondary {
+            background-color: #f44336;
+            border-color: #f44336;
+            color: #ffffff;
+        }
+
+        table a {
+            text-decoration: none;
+            color: rgb(105, 42, 9)
+        }
+
+        /*flash message*/
+        @keyframes slideIn {
+            0% {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .flash-message {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            width: 500px;
+            z-index: 1050;
+            animation: slideIn 0.5s forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    {{#if success_msg}}
+    <div class="flash-message alert alert-success alert-dismissible fade show" role="alert">
+        {{success_msg}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{/if}}
+
+    {{#if error_msg}}
+    <div class="flash-message alert alert-danger alert-dismissible fade show" role="alert">
+        {{error_msg}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {{/if}}
+
+    <div id="alertContainer" class="position-fixed top-20 end-0 p-3" style="z-index: 9999;"></div>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="mb-4 text-center">
+                <a class="navbar-brand" href="/">
+                    <h4>POINT OF SALE</h4>
+                </a>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="/" class="nav-link active d-flex align-items-center">
+                        <i class="fa-solid fa-house me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="/products" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-list-check me-2"></i>
+                        {{#if user.isAdmin}}
+                        Quản lý sản phẩm
+                        {{else}}
+                        Danh sách sản phẩm
+                        {{/if}}
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="/categories" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-layer-group me-2"></i>
+                        {{#if user.isAdmin}}
+                        Quản lý danh mục
+                        {{else}}
+                        Danh sách danh mục
+                        {{/if}}
+                    </a>
+                </li>
+                {{#if user.isAdmin}}
+                <li class="nav-item mb-2">
+                    <a href="/employees" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-people-group me-2"></i>Quản lý nhân viên
+                    </a>
+                </li>
+                {{/if}}
+                <li class="nav-item mb-2">
+                    <a href="/transaction" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-money-bill-transfer me-2"></i>Xử lý giao dịch
+                    </a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="/reports" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-chart-bar me-2"></i>Báo cáo và phân tích
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/profile" class="nav-link d-flex align-items-center">
+                        <i class="fa-solid fa-gear me-2"></i>Hồ sơ
+                    </a>
+                </li>
+            </ul>
+            <!-- Nút Đăng xuất -->
+            <a href="/auth/logout" class="nav-link logout-btn d-flex align-items-center">
+                <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+            </a>
+        </nav>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <button id="toggleSidebar" class="btn btn-outline-secondary me-3">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-end">
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="/img/users/{{user.avatar}}" width="30" alt="avatar">
+                                    {{user.fullname}}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                                    <li><a class="dropdown-item" href="/profile">Hồ sơ</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="/auth/logout">Đăng xuất</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Content -->
+            <div class="content">
+                {{{body}}}
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+        setTimeout(function () {
+            $(".flash-message").alert('close');
+        }, 5000);
+
+        function formatVND(value) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const seconds = String(d.getSeconds()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        function showAlert(type, message) {
+            const alertId = `alert-${Date.now()}`; // Tạo ID duy nhất cho alert
+            const alertHtml = `
+            <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>`;
+            $('#alertContainer').append(alertHtml);
+
+            setTimeout(() => {
+                $(`#${alertId}`).alert('close');
+            }, 5000);
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            const $toggleButton = $('#toggleSidebar');
+            const $sidebar = $('#sidebar');
+
+            $toggleButton.on('click', function () {
+                $sidebar.toggleClass('collapsed');
+            });
+
+            const currentUrl = window.location.pathname;
+            // Tìm tất cả các thẻ <a> có class .nav-link
+            $('.nav-link').each(function () {
+                const linkUrl = $(this).attr('href');
+                if (currentUrl.includes(linkUrl)) {
+                    $('.nav-link').removeClass('active');
+                    $(this).addClass('active');
+                }
+            });
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,289 @@
+<style>
+    .order_product_img {
+        max-width: 60px;
+        max-height: 60px;
+        object-fit: cover;
+    }
+</style>
+
+<div class="container p-3">
+    <div class="text-center mb-4">
+        <h1>Báo cáo và phân tích</h1>
+        <p class="text-muted">Xem dữ liệu bán hàng theo khoảng thời gian</p>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title mb-3 text-center text-danger-emphasis">Bộ lọc dữ liệu bán hàng</h3>
+            <form>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="timeline" class="form-label">Chọn thời gian</label>
+                        <select id="timeline" name="timeline" class="form-select">
+                            <option value="today">Hôm nay</option>
+                            <option value="yesterday">Hôm qua</option>
+                            <option value="last_7_days">7 ngày qua</option>
+                            <option value="this_month">Tháng này</option>
+                            <option value="custom">Khoảng tùy chọn</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">Ngày bắt đầu</label>
+                        <input type="date" id="startDate" name="startDate" class="form-control" disabled>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">Ngày kết thúc</label>
+                        <input type="date" id="endDate" name="endDate" class="form-control" disabled>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" id="viewReportButton" class="btn btn-primary w-100">
+                            <i class="fa-regular fa-rectangle-list me-1"></i>
+                            Xem báo cáo
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title mb-3 text-center text-success-emphasis">Số liệu thống kê</h3>
+            <div class="row text-center">
+                <div class="{{#if user.isAdmin}}col-md-3{{else}}col-md-4{{/if}}">
+                    <h6>Tổng tiền nhận được</h6>
+                    <p id="totalAmount" class="text-success fw-bold"></p>
+                </div>
+                <div class="{{#if user.isAdmin}}col-md-3{{else}}col-md-4{{/if}}">
+                    <h6>Số đơn hàng</h6>
+                    <p id="totalOrders" class="text-primary fw-bold"></p>
+                </div>
+                <div class="{{#if user.isAdmin}}col-md-3{{else}}col-md-4{{/if}}">
+                    <h6>Số sản phẩm đã bán</h6>
+                    <p id="totalProducts" class="text-warning fw-bold"></p>
+                </div>
+                {{#if user.isAdmin}}
+                <div class="col-md-3" id="profitSection">
+                    <h6>Tổng lợi nhuận</h6>
+                    <p id="totalProfit" class="text-danger fw-bold"></p>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title mb-3 text-center text-primary-emphasis">Danh sách đơn hàng</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Mã đơn hàng</th>
+                            <th>Ngày tạo</th>
+                            <th>Thành tiền</th>
+                            <th>Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Order Details -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="orderDetailsModalLabel">Chi tiết đơn hàng</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h5 class="mb-3 text-primary">Thông tin đơn hàng</h5>
+                    <p><strong>Mã đơn hàng:</strong> <span id="modalOrderId"></span></p>
+                    <p><strong>Ngày tạo:</strong> <span id="modalOrderDate"></span></p>
+                    <p><strong>Tổng tiền:</strong> <span id="modalTotalPrice"></span></p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h5 class="mb-3 text-warning">Thông tin khách hàng</h5>
+                    <p><strong>Họ và tên:</strong> <span id="modalCustomerName"></span></p>
+                    <p><strong>Số điện thoại:</strong> <span id="modalCustomerPhone"></span></p>
+                    <p><strong>Địa chỉ:</strong> <span id="modalCustomerAddress"></span></p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <h5 class="mb-3 text-success">Nhân viên phụ trách</h5>
+                    <p><strong>Mã nhân viên:</strong> <span id="modalStaffId"></span></p>
+                    <p><strong>Tên:</strong> <span id="modalStaffName"></span></p>
+                </div>
+                <hr>
+                <h5 class="mb-3 text-danger-emphasis">Danh sách sản phẩm</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="text-center align-middle table-primary">
+                            <tr>
+                                <th>#</th>
+                                <th>Mã vạch</th>
+                                <th>Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalProductDetails">
+                            <!-- Chi tiết sản phẩm sẽ được chèn ở đây -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Bắt sự kiện khi nhấn nút "Xem báo cáo"
+        $("#viewReportButton").on("click", function (event) {
+            event.preventDefault();
+
+            const timeline = $("#timeline").val();
+            const startDate = $("#startDate").val();
+            const endDate = $("#endDate").val();
+
+            $.ajax({
+                url: "/reports/filter",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ timeline, startDate, endDate }),
+                success: function (response) {
+                    if (response.success) {
+                        $("#totalAmount").text(formatVND(response.summary.totalAmount));
+                        $("#totalOrders").text(response.summary.totalOrders);
+                        $("#totalProducts").text(response.summary.totalProducts);
+                        if (response.summary.totalProfit !== undefined) {
+                            $("#totalProfit").text(formatVND(response.summary.totalProfit)).parent().show();
+                        } else {
+                            $("#totalProfit").parent().hide();
+                        }
+                        // Cập nhật danh sách đơn hàng
+                        const tableBody = $("#ordersTableBody");
+                        tableBody.empty();
+
+                        response.orders.forEach((order, index) => {
+                            const orderRow = `
+                                <tr class="align-middle">
+                                    <td>${index + 1}</td>
+                                    <td>${order._id}</td>
+                                    <td>${formatDate(order.created_at)}</td>
+                                    <td>${formatVND(order.total_price)}</td>
+                                    <td>
+                                        <button 
+                                            class="btn btn-sm btn-info px-2 viewOrderButton"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#orderDetailsModal" 
+                                            data-order-id="${order._id}">
+                                            <i class="fa-solid fa-eye me-1"></i>
+                                            Xem
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.append(orderRow);
+                        });
+
+                        // Gắn sự kiện cho các nút "Xem" trong bảng đơn hàng
+                        $(".viewOrderButton").on("click", function () {
+                            const orderId = $(this).data("order-id");
+                            loadOrderDetails(orderId);
+                        });
+
+                        showAlert("success", response.message)
+                    } else {
+                        showAlert("danger", response.message || "Lỗi danh sách đơn hàng")
+                    }
+                },
+                error: function (xhr) {
+                    showAlert("warning", xhr.responseJSON?.message || "Có lỗi xảy ra khi lọc dữ liệu.");
+                },
+            });
+        });
+
+        // Kích hoạt khi chọn khoảng tùy chỉnh ở timeline
+        $("#timeline").on("change", function () {
+            if ($(this).val() === "custom") {
+                $("#startDate").removeAttr("disabled");
+                $("#endDate").removeAttr("disabled");
+            } else {
+                $("#startDate").attr("disabled", true).val("");
+                $("#endDate").attr("disabled", true).val("");
+            }
+        });
+
+        // Hàm tải chi tiết đơn hàng
+        function loadOrderDetails(orderId) {
+            $.ajax({
+                url: `/reports/order/${orderId}/details`,
+                method: "GET",
+                success: function (response) {
+                    if (response.success) {
+                        const order = response.order;
+
+                        // Điền thông tin đơn hàng
+                        $("#modalOrderId").text(order._id);
+                        $("#modalOrderDate").text(formatDate(order.created_at));
+                        $("#modalTotalPrice").text(formatVND(order.total_price));
+
+                        // Điền thông tin khách hàng
+                        $("#modalCustomerName").text(order.customer.name);
+                        $("#modalCustomerPhone").text(order.customer.phone);
+                        $("#modalCustomerAddress").text(order.customer.address);
+
+                        // Điền thông tin nhân viên
+                        $("#modalStaffId").text(order.employee._id);
+                        $("#modalStaffName").text(order.employee.name);
+
+                        // Hiển thị chi tiết sản phẩm
+                        const productDetails = order.products.map((product, index) => `
+                    <tr class="align-middle">
+                        <td>${index + 1}</td>
+                        <td>${product.barcode}</td>
+                        <td><img class="order_product_img" src="/img/products/${product.image}" alt="Ảnh sản phẩm"></td>
+                        <td>${product.name}</td>
+                        <td class="text-center">${product.quantity}</td>
+                        <td class="text-center">${formatVND(product.price)}</td>
+                        <td class="text-center">${formatVND(product.total)}</td>
+                    </tr>
+                `).join("");
+                        $("#modalProductDetails").html(productDetails);
+                    } else {
+                        $("#modalProductDetails").modal("hide");
+                        showAlert("danger", response.message || "Lỗi không xác định.")
+                    }
+                },
+                error: function (xhr) {
+                    $("#modalProductDetails").modal("hide");
+                    showAlert("danger", xhr.responseJSON?.message || "Có lỗi xảy ra khi tải chi tiết đơn hàng.");
+                },
+            });
+        }
+
+    });
+</script>

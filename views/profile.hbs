@@ -1,0 +1,400 @@
+<style>
+    body {
+        background: #f5f5f5;
+    }
+
+    .ui-w-80 {
+        width: 80px !important;
+        height: auto;
+    }
+
+    .btn-default {
+        border-color: rgba(24, 28, 33, 0.1);
+        background: rgba(0, 0, 0, 0);
+        color: #4E5155;
+    }
+
+    label.btn {
+        margin-bottom: 0;
+    }
+
+    .btn-outline-primary {
+        border-color: #26B4FF;
+        background: transparent;
+        color: #26B4FF;
+    }
+
+    .btn {
+        cursor: pointer;
+    }
+
+    .text-light {
+        color: #babbbc !important;
+    }
+
+    .btn-facebook {
+        border-color: rgba(0, 0, 0, 0);
+        background: #3B5998;
+        color: #fff;
+    }
+
+    .btn-instagram {
+        border-color: rgba(0, 0, 0, 0);
+        background: #000;
+        color: #fff;
+    }
+
+    .card {
+        background-clip: padding-box;
+        box-shadow: 0 1px 4px rgba(24, 28, 33, 0.012);
+    }
+
+    .row-bordered {
+        overflow: hidden;
+    }
+
+    .account-settings-fileinput {
+        position: absolute;
+        visibility: hidden;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .account-settings-links .list-group-item.active {
+        font-weight: bold !important;
+    }
+
+    html:not(.dark-style) .account-settings-links .list-group-item.active {
+        background: transparent !important;
+    }
+
+    .account-settings-multiselect~.select2-container {
+        width: 100% !important;
+    }
+
+    .light-style .account-settings-links .list-group-item {
+        padding: 0.85rem 1.5rem;
+        border-color: rgba(24, 28, 33, 0.03) !important;
+    }
+
+    .light-style .account-settings-links .list-group-item.active {
+        color: #4e5155 !important;
+    }
+
+    .material-style .account-settings-links .list-group-item {
+        padding: 0.85rem 1.5rem;
+        border-color: rgba(24, 28, 33, 0.03) !important;
+    }
+
+    .material-style .account-settings-links .list-group-item.active {
+        color: #4e5155 !important;
+    }
+
+    .dark-style .account-settings-links .list-group-item {
+        padding: 0.85rem 1.5rem;
+        border-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .dark-style .account-settings-links .list-group-item.active {
+        color: #fff !important;
+    }
+
+    .light-style .account-settings-links .list-group-item.active {
+        color: #4E5155 !important;
+    }
+
+    .light-style .account-settings-links .list-group-item {
+        padding: 0.85rem 1.5rem;
+        border-color: rgba(24, 28, 33, 0.03) !important;
+    }
+</style>
+
+<div class="container light-style flex-grow-1 container-p-y p-3">
+    <h1 class="mb-4 text-center">
+        Cài đặt tài khoản
+    </h1>
+    <div class="card overflow-hidden">
+        <div class="row g-0 row-bordered row-border-light">
+            <div class="col-md-3 pt-0 ">
+                <div class="list-group list-group-flush account-settings-links">
+                    <a class="list-group-item list-group-item-action active" data-bs-toggle="list"
+                        href="#account-general">Tổng quan</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#account-info">Thông
+                        tin cá nhân</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="list"
+                        href="#account-change-password">Đổi mật khẩu</a>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="tab-content">
+                    {{!-- Tổng quan --}}
+                    <div class="tab-pane fade show active" id="account-general">
+                        <form class="infor-form" enctype="multipart/form-data">
+                            <div class="card-body d-flex align-items-center">
+                                <img id="avatar-preview" src="/img/users/{{user.avatar}}" alt="Ảnh hồ sơ"
+                                    class="d-block ui-w-80">
+                                <div class="ms-4">
+                                    <label class="btn btn-outline-primary">
+                                        Upload new photo
+                                        <input id="avatar-input" type="file" class="account-settings-fileinput"
+                                            name="avatar" accept="image/*">
+                                    </label>
+                                    <button id="reset-avatar" type="button"
+                                        class="btn btn-outline-danger md-btn-flat ms-2">Reset</button>
+                                    <div class="text-light small mt-1">Allowed JPG, GIF or PNG. Max size of 2MB</div>
+                                </div>
+                            </div>
+                            <hr class="border-light m-0">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" for="email">E-mail</label>
+                                    <input type="text" class="form-control" id="email" name="email"
+                                        value="{{user.email}}" disabled>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="username">Tên đăng nhập</label>
+                                    <input type="text" class="form-control" id="username" name="username"
+                                        value="{{user.username}}" disabled>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="fullname">Họ và tên</label>
+                                    <input type="text" class="form-control" id="fullname" name="fullname"
+                                        value="{{user.fullname}}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Vai trò</label>
+                                    <input type="text" class="form-control"
+                                        value="{{#if user.isAdmin}}Quản trị viên{{else}}Nhân viên bán hàng{{/if}}"
+                                        disabled>
+                                </div>
+                            </div>
+                            <div class="text-end mb-3 me-3">
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>&nbsp;
+                                <button type="button" class="btn btn-danger">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {{!-- Thông tin cá nhân--}}
+                    <div class="tab-pane fade" id="account-info">
+                        <form class="infor-form">
+                            <div class="card-body pb-2">
+                                <div class="mb-3">
+                                    <label class="form-label" for="bio">Tiểu sử</label>
+                                    <textarea class="form-control" rows="5" id="bio" name="bio">{{user.bio}}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="birthday">Ngày sinh</label>
+                                    <input type="date" class="form-control" id="birthday" name="birthday"
+                                        value="{{user.birthday}}">
+
+                                </div>
+                            </div>
+                            <hr class="border-light m-0">
+                            <div class="card-body pb-2">
+                                <h6 class="mb-4">Liên hệ</h6>
+                                <div class="mb-3">
+                                    <label class="form-label" for="phone">Số điện thoại</label>
+                                    <input type="text" class="form-control" id="phone" name="phone"
+                                        value="{{user.phone}}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="website">Website</label>
+                                    <input type="text" class="form-control" id="website" name="website"
+                                        value="{{user.website}}">
+                                </div>
+                            </div>
+                            <div class="text-end mb-3 me-3">
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>&nbsp;
+                                <button type="button" class="btn btn-danger">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {{!-- Đổi mật khẩu --}}
+                    <div class="tab-pane fade" id="account-change-password">
+                        <form id="change-password-form">
+                            <div class="card-body pb-2">
+                                <div class="mb-3">
+                                    <label class="form-label" for="password">Mật khẩu hiện tại</label>
+                                    <input type="password" id="password" name="currentPassword" class="form-control"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="new-password">Mật khẩu mới</label>
+                                    <input type="password" id="new-password" name="newPassword" class="form-control"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="confirm-password">Xác nhận mật khẩu</label>
+                                    <input type="password" id="confirm-password" name="confirmPassword"
+                                        class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="text-end mb-3 me-3">
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>&nbsp;
+                                <button type="button" class="btn btn-danger">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    /*
+    document.addEventListener("DOMContentLoaded", () => {
+        const avatarInput = document.getElementById("avatar-input");
+        const avatarPreview = document.getElementById("avatar-preview");
+        const resetButton = document.getElementById("reset-avatar");
+
+        // Lưu lại đường dẫn ảnh cũ để khôi phục khi nhấn Reset
+        const originalAvatarSrc = avatarPreview.src;
+
+        // Xử lý khi người dùng chọn ảnh mới
+        avatarInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+
+            if (file) {
+                // Kiểm tra định dạng file
+                if (!file.type.match("image.*")) {
+                    alert("Vui lòng chọn một file ảnh hợp lệ (JPG, PNG, GIF).");
+                    return;
+                }
+
+                // Hiển thị ảnh tạm thời bằng FileReader
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    avatarPreview.src = e.target.result; // Hiển thị ảnh mới
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Xử lý khi người dùng nhấn nút Reset
+        resetButton.addEventListener("click", () => {
+            avatarInput.value = ""; // Xóa file đã chọn
+            avatarPreview.src = originalAvatarSrc; // Khôi phục ảnh cũ
+        });
+    });*/
+
+
+    $(document).ready(function () {
+
+        const $avatarInput = $("#avatar-input");
+        const $avatarPreview = $("#avatar-preview");
+        const $resetButton = $("#reset-avatar");
+
+        // Lưu lại đường dẫn ảnh cũ để khôi phục khi nhấn Reset
+        const originalAvatarSrc = $avatarPreview.attr("src");
+
+        // Xử lý khi người dùng chọn ảnh mới
+        $avatarInput.on("change", function () {
+            const file = this.files[0]; // Lấy file đầu tiên từ input
+
+            if (file) {
+                // Kiểm tra định dạng file
+                if (!file.type.match("image.*")) {
+                    alert("Vui lòng chọn một file ảnh hợp lệ (JPG, PNG, GIF).");
+                    return;
+                }
+
+                // Hiển thị ảnh tạm thời bằng FileReader
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    $avatarPreview.attr("src", e.target.result); // Hiển thị ảnh mới
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Xử lý khi người dùng nhấn nút Reset
+        $resetButton.on("click", function () {
+            $avatarInput.val(""); // Xóa file đã chọn
+            $avatarPreview.attr("src", originalAvatarSrc); // Khôi phục ảnh cũ
+        });
+        
+        $(".infor-form").on("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this); // Lấy toàn bộ dữ liệu từ form
+
+            $.ajax({
+                url: '/profile',
+                method: 'PUT',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert(response.message);
+                    location.reload()
+                },
+                error: function (xhr) {
+                    alert(xhr.responseJSON?.message || "Có lỗi xảy ra khi thay đổi thông tin tài khoản.");
+                }
+            });
+        });
+
+        // Xử lý form đổi mật khẩu
+        $("#change-password-form").on("submit", function (event) {
+            event.preventDefault();
+
+            const formData = $(this).serialize(); // Lấy dữ liệu từ form
+
+            $.ajax({
+                url: '/auth/change-password',
+                method: 'PUT',
+                data: formData,
+                success: function (response) {
+                    alert(response.message);
+                    location.reload()
+                },
+                error: function (xhr) {
+                    alert(xhr.responseJSON?.message || "Có lỗi xảy ra khi thay đổi mật khẩu.");
+                    console.error(xhr.responseJSON); // Hiển thị lỗi
+                }
+            });
+        });
+
+        // Lưu giá trị ban đầu của các input khi tải trang
+        $(".infor-form").each(function () {
+            const $form = $(this);
+            $form.data("initialValues", $form.serializeArray());
+        });
+
+        // Xử lý hành vi nút "Hủy" trong form class "infor-form"
+        $(".infor-form .btn-danger").on("click", function () {
+            const $form = $(this).closest("form");
+
+            // Gán lại giá trị ban đầu cho các input
+            const initialValues = $form.data("initialValues");
+
+            if (initialValues) {
+                initialValues.forEach(function (field) {
+                    const $input = $form.find(`[name="${field.name}"]`);
+                    if ($input.is(":checkbox, :radio")) {
+                        $input.prop("checked", field.value === "on");
+                    } else {
+                        $input.val(field.value);
+                    }
+                });
+            }
+        });
+
+        // Xử lý hành vi nút "Hủy" trong form đổi mật khẩu
+        $("#change-password-form .btn-danger").on("click", function () {
+            const $form = $(this).closest("form");
+
+            // Xóa giá trị trong các ô input
+            $form.find("input").val("");
+        });
+
+    });
+
+
+</script>

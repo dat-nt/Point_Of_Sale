@@ -1,0 +1,89 @@
+<style>
+    .dashboard-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+
+    .dashboard-card img {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 15px;
+    }
+
+    .dashboard-card:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+
+    .dashboard-card h5 {
+        font-size: 1.25rem;
+        margin: 10px 0 5px;
+    }
+
+    .dashboard-card p {
+        font-size: 1rem;
+        margin: 0;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container p-3">
+    <div class="text-center mb-4">
+        <h1>Dashboard</h1>
+        <p class="text-muted">Số liệu thống kê</p>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row gy-4 gx-4">
+        <!-- Total Products -->
+        <div class="{{#if user.isAdmin}}col-md-6 col-lg-3{{else}}col-md-4{{/if}}">
+            <div class="dashboard-card bg-primary text-white" data-url="/products">
+                <img src="/img/product.png" alt="Products">
+                <h5>Tổng số sản phẩm</h5>
+                <p>{{stats.products}}</p>
+            </div>
+        </div>
+        <!-- Total Categories -->
+        <div class="{{#if user.isAdmin}}col-md-6 col-lg-3{{else}}col-md-4{{/if}}">
+            <div class="dashboard-card bg-success text-white" data-url="/categories">
+                <img src="/img/category.png" alt="Categories">
+                <h5>Tổng số danh mục</h5>
+                <p>{{stats.categories}}</p>
+            </div>
+        </div>
+        <!-- Total Users -->
+        {{#if user.isAdmin}}
+        <div class="col-md-6 col-lg-3">
+            <div class="dashboard-card bg-warning text-white" data-url="/employees">
+                <img src="/img/user.png" alt="Users">
+                <h5>Tổng số nhân viên</h5>
+                <p>{{stats.sales}}</p>
+            </div>
+        </div>
+        {{/if}}
+        <!-- Total Orders -->
+        <div class="{{#if user.isAdmin}}col-md-6 col-lg-3{{else}}col-md-4{{/if}}">
+            <div class="dashboard-card bg-danger text-white" data-url="/reports">
+                <img src="/img/order.png" alt="Orders">
+                <h5>Tổng số đơn hàng</h5>
+                <p>{{stats.orders}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('.dashboard-card').on('click', function () {
+        const url = $(this).data('url');
+        if (url) {
+            window.location.href = url;
+        }
+    });
+</script>

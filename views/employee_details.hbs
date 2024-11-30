@@ -1,0 +1,54 @@
+<div class="container py-3">
+    <h1 class="text-center mb-4">Chi tiết nhân viên</h1>
+    <div class="card shadow-lg">
+        <div class="row g-0">
+
+            <div class="col-md-4 text-center bg-light d-flex align-items-center justify-content-center p-3">
+                <img src="/img/users/{{employee.avatar}}" alt="Avatar"
+                    class="img-fluid rounded-circle shadow" style="width: 200px; height: 200px; object-fit: cover;" />
+            </div>
+
+            <div class="col-md-8">
+                <div class="card-body ms-3">
+                    <h3 class="card-title text-primary mb-3">{{employee.fullname}}</h3>
+                    <h6 class="card-subtitle mb-3 text-muted">Email: {{employee.email}}</h6>
+                    <div class="mb-2">
+                        <strong>Tên đăng nhập:</strong> {{employee.username}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Vai trò:</strong> {{employee.role}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Trạng thái:</strong>
+                        <span class="badge {{#ifCond employee.status "==" "Active"}}bg-success{{else}}bg-danger{{/ifCond}}">
+                            {{employee.status}}
+                        </span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Số điện thoại:</strong> {{employee.phone}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Website:</strong>
+                        <a href="{{employee.website}}" target="_blank" class="text-decoration-none">
+                            {{employee.website}}
+                        </a>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Ngày sinh:</strong> {{employee.birthday}}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Tiểu sử:</strong>
+                        <p class="text-muted">{{employee.bio}}</p>
+                    </div>
+                    <div class="text-end">
+                        <a href="/employees" class="shadow btn btn-primary mt-4">
+                            <i class="fa-solid fa-arrow-left me-2"></i>
+                            Quay lại
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

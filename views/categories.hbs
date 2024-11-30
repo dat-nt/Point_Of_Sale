@@ -1,0 +1,205 @@
+<div class="container p-3">
+    <h1 class="mb-4 text-center">Danh mục sản phẩm</h1>
+
+    <!-- Nút thêm danh mục -->
+    {{#if user.isAdmin}}
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+        <i class="fa-solid fa-circle-plus me-2"></i> Thêm danh mục
+    </button>
+    {{/if}}
+
+    <!-- Bảng danh mục -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark text-center align-middle">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Tên danh mục</th>
+                    <th scope="col">Mô tả</th>
+                    <th scope="col">Ngày cập nhật</th>
+                    {{#if user.isAdmin}}
+                    <th scope="col">Thao tác</th>
+                    {{/if}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#each categories}}
+                <tr data-id="{{this._id}}" class="align-middle">
+                    <th scope="row">{{increment @index}}</th>
+                    <td class="category-name">{{name}}</td>
+                    <td class="category-desc">{{description}}</td>
+                    <td>{{formatDate updatedAt}}</td>
+                    {{#if ../user.isAdmin}}
+                    <td>
+                        <!-- Nút sửa -->
+                        <button class="btn btn-warning btn-sm me-2 edit-category-btn" data-bs-toggle="modal"
+                            data-bs-target="#editCategoryModal" data-id="{{this._id}}">
+                            Sửa
+                        </button>
+                        <!-- Nút xóa -->
+                        <button class="btn btn-danger btn-sm delete-category-btn" data-bs-toggle="modal"
+                            data-bs-target="#deleteCategoryModal" data-id="{{this._id}}" data-name="{{this.name}}">
+                            Xóa
+                        </button>
+                    </td>
+                    {{/if}}
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal Thêm Danh Mục -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="/categories" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="addCategoryModalLabel">Thêm danh mục</h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Tên danh mục</label>
+                        <input type="text" class="form-control" id="categoryName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryDesc" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="categoryDesc" name="description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Sửa Danh Mục -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="editCategoryModalLabel">Sửa danh mục</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ID Danh mục (ẩn) -->
+                <input type="hidden" id="editCategoryId">
+                <div class="mb-3">
+                    <label for="editCategoryName" class="form-label">Tên danh mục</label>
+                    <input type="text" class="form-control" id="editCategoryName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editCategoryDesc" class="form-label">Mô tả</label>
+                    <textarea class="form-control" id="editCategoryDesc"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="saveEditCategory" class="btn btn-primary">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xóa Danh Mục -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="deleteCategoryModalLabel">Xóa danh mục</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="deleteCategoryId">
+                <p>Bạn có chắc muốn xóa danh mục <strong id="deleteCategoryName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="confirmDeleteCategory" class="btn btn-danger">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Xử lý sửa danh mục
+    $(document).on('click', '.edit-category-btn', function () {
+        const id = $(this).data('id');
+        const row = $(`tr[data-id='${id}']`);
+        const name = row.find('.category-name').text();
+        const desc = row.find('.category-desc').text();
+
+        $('#editCategoryId').val(id);
+        $('#editCategoryName').val(name);
+        $('#editCategoryDesc').val(desc);
+    });
+
+    $('#saveEditCategory').on('click', function () {
+        const id = $('#editCategoryId').val();
+        const name = $('#editCategoryName').val();
+        const desc = $('#editCategoryDesc').val();
+
+        $.ajax({
+            url: `/categories/${id}/edit`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({ name, description: desc }),
+            success: function (response) {
+                showAlert('success', response.message);
+
+                // Cập nhật thông tin danh mục trên bảng
+                const row = $(`tr[data-id='${id}']`);
+                row.find('.category-name').text(response.category.name);
+                row.find('.category-desc').text(response.category.description);
+                row.find('td:last').prev().text(formatDate(response.category.updatedAt));
+
+                // Đóng modal
+                $('#editCategoryModal').modal('hide');
+            },
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON?.message || 'Lỗi không xác định xảy ra.';
+                showAlert('danger', errorMessage);
+            }
+        });
+    });
+
+    // Xử lý xóa danh mục
+    $(document).on('click', '.delete-category-btn', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        $('#deleteCategoryId').val(id);
+        $('#deleteCategoryName').text(name);
+    });
+
+    $('#confirmDeleteCategory').on('click', function () {
+        const id = $('#deleteCategoryId').val();
+
+        $.ajax({
+            url: `/categories/${id}/delete`,
+            method: 'DELETE',
+            success: function () {
+                showAlert('success', 'Danh mục đã được xóa thành công.');
+
+                // Xóa hàng khỏi bảng
+                $(`tr[data-id='${id}']`).remove();
+
+                $('#deleteCategoryModal').modal('hide');
+            },
+            error: function (xhr) {
+                const errorMessage = xhr.responseJSON?.message || 'Lỗi không xác định xảy ra.';
+                showAlert('danger', errorMessage);
+                $('#deleteCategoryModal').modal('hide');
+
+            }
+        });
+    });
+</script>
