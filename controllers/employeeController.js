@@ -73,7 +73,7 @@ const createEmployee = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "1m" }
         );
-        const activationLink = `http://localhost:${process.env.PORT}/auth/activate/${token}`;
+        const activationLink = `https://point-of-sale-4r85.onrender.com/auth/activate/${token}`;
 
         // Gửi email kích hoạt
         await transporter.sendMail({
@@ -121,7 +121,7 @@ const resendEmail = async (req, res) => {
             expiresIn: "1m",
         });
 
-        const activationLink = `http://localhost:${process.env.PORT}/auth/activate/${token}`;
+        const activationLink = `https://point-of-sale-4r85.onrender.com/auth/activate/${token}`;
 
         await transporter.sendMail({
             to: user.email,
